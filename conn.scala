@@ -7,7 +7,7 @@ import ml._
 
 object conn {
   //scala -cp . conn 1
-  implicit val getJudgementResult = GetResult(r => Judgement(r.<<, r.<<))
+  implicit val getJudgementResult = GetResult(r => Judgement(r.<<, r.<<, r.<<))
   
   def main(args: Array[String]) = {
     
@@ -22,15 +22,24 @@ object conn {
     var i4 = iter(uids,js,4)
     
     def update(ts: TrueScore) = (Q.u + "update nmm.assess_userassessment " +
-    		"set truescore = " +? ts.true_score +
+    		"set truescore = " +? ts.true_score + ", " +
+    		"rawscore = " +? ts.obs + ", " +
+    		"scoreaccuracy = " +? ts.se + ", " +
+    		"comparisons = " +? ts.comps + ", " +
+    		"timetaken = " +? ts.timetaken +
     		" where assessment_id = "+? sup + " and user_id = "+? ts.id +";").execute    		
-
+    i4.foreach(update)
+   
     // Update
     i4.foreach(println)
-    i4.foreach(update)
     println(i4.length.toString + " records updated")
-    
     }
+    
+    //val js2 = List(Judgement(1,2),Judgement(1,2),Judgement(1,2),Judgement(1,2),Judgement(2,1),Judgement(2,1))
+    //var uids2 = extractIds(js2, Nil)
+    //var i42 = iter(uids2, js2, 4)
+    //i42.foreach(println)
+    
   
   }
   
