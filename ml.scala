@@ -1,5 +1,6 @@
 object ml {
   
+  case class Assessment(id: Int)
   case class Judgement(userchosen: Int, usernotchosen: Int, timetaken: Double)
   case class TrueScore(id: Int, true_score: Double, se:Double, obs:Int, comps:Int, timetaken:Double)
   case class Contest(opponent_ability:Double, result:Int)
