@@ -14,7 +14,7 @@ object conn {
     //assessment id
     val sup = args(0).toInt
     
-    Database.forURL("jdbc:mysql://nmm.cjibvszqadnr.eu-west-1.rds.amazonaws.com:3306/questaurus", driver = "com.mysql.jdbc.Driver", user = "django", password="z5A!a4!c") withSession {
+    Database.forURL("jdbc:mysql://nmm.cjibvszqadnr.eu-west-1.rds.amazonaws.com:3306/nmm", driver = "com.mysql.jdbc.Driver", user = "django", password="z5A!a4!c") withSession {
     
     val q = sql"call get_judgements_sp ($sup)".as[Judgement]
        
@@ -22,26 +22,39 @@ object conn {
     var uids = extractIds(js, Nil)
     var i4 = iter(uids,js,4)
     
-    def update(ts: TrueScore) = (Q.u + "update questaurus.assess_userassessment " +
+    
+    def update(ts: TrueScore) = (Q.u + "update nmm.assess_userassessment " +
     		"set truescore = " +? ts.true_score + ", " +
     		"rawscore = " +? ts.obs + ", " +
     		"scoreaccuracy = " +? ts.se + ", " +
     		"comparisons = " +? ts.comps + ", " +
     		"timetaken = " +? ts.timetaken +
-    		" where assessment_id = "+? sup + " and user_id = "+? ts.id +";").execute    		
+    		" where id = "+? ts.id +";").execute
+    		 
+    /*
+    def update(ts: TrueScore) = (Q.u + "call nmm.update_true_scores " +
+    		"(" +? ts.true_score + 
+    		"," +? ts.obs + 
+    		"," +? ts.se + 
+    		"," +? ts.comps + 
+    		"," +? ts.timetaken +
+    		","+? ts.id +");").execute
+    		 
+    */
+    		
+    //call update_true_scores (5.5555, 101, 0.001, 102, 33.3, 107)
+    
     i4.foreach(update)
    
     // Update
     i4.foreach(println)
     println(i4.length.toString + " records updated")
     
-    val assignment:Assessment = new Assessment(id=sup)
-    def update_ass(ass: Assessment) = (Q.u + "update questaurus.assess_assessment " +
-        "set needsupdating = 0 where id = " +? ass.id).execute
-        
-    update_ass(assignment)
-    //return(true)
-    
+    //Needs this for questaurus
+    //val assignment:Assessment = new Assessment(id=sup)
+    //def update_ass(ass: Assessment) = (Q.u + "update questaurus.assess_assessment " +
+    //    "set needsupdating = 0 where id = " +? ass.id).execute
+    //update_ass(assignment)    
     
     }
     
