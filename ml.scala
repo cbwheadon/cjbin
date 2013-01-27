@@ -1,9 +1,14 @@
 object ml {
   
   case class Assessment(id: Int)
-  case class Judgement(userchosen: Int, usernotchosen: Int, timetaken: Double)
+  case class Judgement(userchosen: Int, usernotchosen: Int, timetaken: Double, marker:Int)
   case class TrueScore(id: Int, true_score: Double, se:Double, obs:Int, comps:Int, timetaken:Double)
   case class Contest(opponent_ability:Double, result:Int)
+  
+  def evenOrOdd (n:Int) : Int = n match {
+     case 0 => 0              
+     case 1 => 1               
+     case _ => evenOrOdd (n-2) }             
   
   def extractIds(ids: List[Judgement], uids: List[TrueScore]): List[TrueScore] = ids match {
      case Nil => uids.distinct
