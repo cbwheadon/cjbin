@@ -1,3 +1,8 @@
+import org.apache.commons.math3.stat.correlation._
+import org.apache.commons.math3.stat.ranking._
+import org.apache.commons.math3.random._
+import scala.util.Random.shuffle
+
 object ml {
   
   case class Assessment(id: Int)
@@ -56,6 +61,32 @@ object ml {
   def iter(uids: List[TrueScore],dat: List[Judgement],iters: Int):List[TrueScore] = iters match {
     case 0 => uids
     case _ => iter(byId(uids, uids, dat, Nil), dat, iters-1)
-  }                                               
+  }
+  
+  def reliability(uids: List[TrueScore],js: List[Judgement]):Double ={
+        val jn = js.length
+        //More than one marker, calculate inter-rater reliabilty
+	    if(jn>1){		
+	      
+	      val jsr = shuffle(js)
+	      val js1 = jsr.slice(0, (jn/2))
+	      val js2 = jsr.slice((jn/2)+1, jn-1)
+	    
+	      val r1 = iter(uids, js1, 4)
+	      val true1 = r1.map(x => x.true_score).toArray
+	
+	      val r2 = iter(uids, js2, 4)
+	      val true2 = r2.map(x => x.true_score).toArray
+	      
+	      val ranking = new NaturalRanking(NaNStrategy.MAXIMAL, TiesStrategy.MAXIMUM);
+	      
+	      new PearsonsCorrelation().correlation(ranking.rank(true1), ranking.rank(true2))
+	      
+	      
+	    } else {
+	      -1.0
+	    }
+    }
+
    
 }
