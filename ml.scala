@@ -58,7 +58,7 @@ object ml {
     case _ => iter(byId(uids, uids, dat, Nil), dat, iters-1)
   }
   
-  def reliability(uids: List[TrueScore],js: List[Judgement]):Double ={
+  def interrater(uids: List[TrueScore],js: List[Judgement]):Double ={
         val jn = js.length
         //More than one marker, calculate inter-rater reliabilty
 	    if(jn>1){		
@@ -75,13 +75,40 @@ object ml {
 	      
 	      val ranking = new NaturalRanking(NaNStrategy.MAXIMAL, TiesStrategy.MAXIMUM);
 	      
-	      new PearsonsCorrelation().correlation(ranking.rank(true1), ranking.rank(true2))
-	      
+	     new PearsonsCorrelation().correlation(ranking.rank(true1), ranking.rank(true2))
 	      
 	    } else {
 	      -1.0
 	    }
     }
-
-   
+  
+def repeatWhile(uids: List[TrueScore],js: List[Judgement],nTries: Int, rel: List[Double]): List[Double] = nTries match {
+    case 0 => rel
+    case _ => repeatWhile(uids,js,nTries-1,interrater(uids,js)::rel)
+}
+  
+def mean[T](item:Traversable[T])(implicit n:Numeric[T]) = {
+  n.toDouble(item.sum) / item.size.toDouble
+}
+  
+def variance[T](items:Traversable[T])(implicit n:Numeric[T]) : Double = {
+  val itemMean = mean(items)
+  val count = items.size
+  val sumOfSquares = items.foldLeft(0.0d)((total,item)=>{
+  val itemDbl = n.toDouble(item)
+  val square = math.pow(itemDbl - itemMean,2)
+    total + square
+  })
+  sumOfSquares / count.toDouble
+}
+  
+def stddev[T](items:Traversable[T])(implicit n:Numeric[T]) : Double = {
+  math.sqrt(variance(items))
+}
+  
+def irrel(uids: List[TrueScore],js: List[Judgement],nTries: Int): List[Double] = {
+     val rels = repeatWhile(uids,js,nTries, Nil)
+     //(0.0 /: rels){_ + _} / rels.length
+     List(mean(rels),stddev(rels))
+  }   
 }

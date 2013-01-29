@@ -27,7 +27,7 @@ object conn {
     i4.foreach(println)
     println("all")
     
-    var ir = reliability(uids,js)
+    var ir = irrel(uids,js,1000)
     println("Reliability:" + ir)
     
     def update(ts: TrueScore) = (Q.u + "update nmm.assess_userassessment " +
